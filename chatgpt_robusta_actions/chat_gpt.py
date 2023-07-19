@@ -11,10 +11,9 @@ lru_cache = cachetools.LRUCache(maxsize=cache_size)
 
 
 class ChatGPTTokenParams(ActionParams):
-    """
-    :var chat_gpt_token: ChatGPT auth token
-    """
-    chat_gpt_token: str
+    azure_openai_token: str
+    azure_openai_api_base: str
+    azure_openai_deployment_id: str
 
 
 class ChatGPTParams(ChatGPTTokenParams):
@@ -32,7 +31,11 @@ def show_chat_gpt_search(event: ExecutionBaseEvent, params: ChatGPTParams):
     Add a finding with ChatGPT top results for the specified search term.
     This action can be used together with the stack_overflow_enricher.
     """
-    openai.api_key = params.chat_gpt_token
+    openai.api_type = "azure"
+    openai.api_base = params.azure_openai_api_base
+    openai.api_version = "2023-05-15"
+    openai.api_key = params.azure_openai_token
+    deployment_id = params.azure_openai_deployment_id
 
     logging.info(f"ChatGPT search term: {params.search_term}")
 
@@ -50,6 +53,7 @@ def show_chat_gpt_search(event: ExecutionBaseEvent, params: ChatGPTParams):
 
             logging.info(f"ChatGPT input: {input}")
             res: OpenAIObject = openai.ChatCompletion.create(
+                deployment_id=deployment_id,
                 model=params.model,
                 messages=input,
                 max_tokens=1000,
@@ -99,7 +103,7 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     alert_name = alert.alert.labels.get("alertname", "")
     if not alert_name:
         return
-
+    
     alert.add_enrichment(
         [
             CallbackBlock(
@@ -108,7 +112,7 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
                         action=show_chat_gpt_search,
                         action_params=ChatGPTParams(
                             search_term=f"{alert_name}",
-                            chat_gpt_token=params.chat_gpt_token,
+                            azure_openai_token=params.azure_openai_token,
                         ),
                     )
                 },
