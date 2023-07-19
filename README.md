@@ -71,18 +71,3 @@ Can ChatGPT give better answers if you feed it pod logs or the output of `kubect
 [Robusta](http://robusta.dev) already collects this data and attaches it to Prometheus alerts, so it should be easy to add. 
 
 PRs are welcome!
-
-# Community
-[Share your funniest output and suggest new features on our Slack.](https://home.robusta.dev/slack)
-
-# Promotional Images
-Feel free to use the following image or create your own.
-
-![Screen Shot 2023-01-10 at 18 29 56](https://user-images.githubusercontent.com/494087/211615506-fb8ba31a-4569-4ab6-9504-f1e42457771e.png)
-
-# More Resources
-* [Natan tests ChatGPT on production Kubernetes alerts](https://www.youtube.com/watch?v=RVK6jb4Ssuo)
-* [Natan Yellin and Sid Palas go over the code on YouTube](https://www.youtube.com/watch?v=jMR8M3Xqlzg
-) - relevant part starts at 38:54
-
-[^1]: Technically this project doesn't use ChatGPT. It uses the `text-davinci-003` model which is a [GPT3.5-based sibling of ChatGPT](https://matt-rickard.ghost.io/gpt-lineage/). Given that most people are familiar with ChatGPT, but not `text-davinci-003` or GPT3.5, we've decided to keep the name "ChatGPT bot" despite the technical inaccuracy.

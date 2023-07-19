@@ -8,6 +8,8 @@ from robusta.api import *
 
 cache_size = 100
 lru_cache = cachetools.LRUCache(maxsize=cache_size)
+
+
 class ChatGPTTokenParams(ActionParams):
     """
     :var chat_gpt_token: ChatGPT auth token
@@ -41,10 +43,9 @@ def show_chat_gpt_search(event: ExecutionBaseEvent, params: ChatGPTParams):
         else:
             start_time = time.time()
             input = [
-                {"role": "system", "content": "You are a helpful assistant that helps Software Developers and DevOps Engineers to solve issues relating to Prometheus alerts for Kubernetes clusters. You are factual, clear and concise. Your responses are formatted using Slack specific markdown to ensure compatibility with displaying your response in a Slack message"},
-                {"role": "user", "content": f"Here are the rules for Slack specific markdown, make sure to only use the following syntax in your responses : Text formatted in bold	Surround text with asterisks: '*your text*', '**' is invalid syntax so do not use it. Text formatted in italics, surround text with underscores: '_your text_'. Text formatted in strikethrough, surround text with tildes: '~your text~'. Text formatted in code, surround text with backticks: '`your text`'. Text formatted in blockquote, add an angled bracket in front of text: '>your text'. Text formatted in code block, add three backticks in front of text: '```your text'. Text formatted in an ordered list, add 1 and a full stop '1.' in front of text. Text formatted in a bulleted list, add an asterisk in front of text: '* your text'."},
-                {"role": "user", "content": f"When responding, you use Slack specific markdown following the rules provided. Always bold and italic headings, i.e '*_The heading:_*', to clearly seperate the content with headers. Don't include any conversational response before the facts."},
-                {"role": "user", "content": f"Please describe what the Kubernetes Prometheus alert '{params.search_term}' means, giving succinct examples of common causes. Provide any possible solutions including any troubleshooting steps that can be performed, give a real world example of a situation that can cause the alert can occur. Clearly seperate sections for Alert Name, Description, Real World Example, Common Causes, Troubleshooting Steps and Possible Solutions."},
+                {"role": "system", "content": "You are a helpful assistant. Provide kubectl commands only, no explanations!"},
+                {"role": "user",
+                 "content": f"Can you analyze the alert and make a Kubernetes command to solve it? Provide only the command, no explanation!\n{params.search_term}"}
             ]
 
             logging.info(f"ChatGPT input: {input}")
@@ -59,15 +60,17 @@ def show_chat_gpt_search(event: ExecutionBaseEvent, params: ChatGPTParams):
                 total_tokens = res.usage['total_tokens']
                 time_taken = time.time() - start_time
                 response_content = res.choices[0].message.content
-                lru_cache[params.search_term] = [response_content]  # Store only the main response in the cache
+                # Store only the main response in the cache
+                lru_cache[params.search_term] = [response_content]
                 answers.append(response_content)
 
             answers.append(f"\n\n ---")
-            answers.append(f"\n\n | Time taken: {time_taken:.2f} seconds | Total tokens used: {total_tokens} |")
-                
+            answers.append(
+                f"\n\n | Time taken: {time_taken:.2f} seconds | Total tokens used: {total_tokens} |")
+
     except Exception as e:
         answers.append(f"Error calling ChatCompletion.create: {e}")
-        raise                
+        raise
 
     finding = Finding(
         title=f"ChatGPT ({params.model}) Results",
@@ -86,7 +89,8 @@ def show_chat_gpt_search(event: ExecutionBaseEvent, params: ChatGPTParams):
             ]
         )
     event.add_finding(finding)
-    
+
+
 @action
 def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenParams):
     """
