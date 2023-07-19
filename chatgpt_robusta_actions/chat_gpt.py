@@ -96,9 +96,9 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     """
     Add a button to the alert - clicking it will ask chat gpt to help find a solution.
     """
-    # alert_name = alert.alert.labels.get("alertname", "")
-    # if not alert_name:
-    #     return
+    alert_name = alert.alert.labels.get("alertname", "")
+    if not alert_name:
+        return
 
     alert.add_enrichment(
         [
