@@ -1,5 +1,6 @@
 import logging
 import time
+import json
 
 import cachetools
 import openai
@@ -97,6 +98,6 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
 
     alert.add_enrichment(
         [
-            JsonBlock(answers)
+            JsonBlock(json.dumps(answers))
         ]
     )
