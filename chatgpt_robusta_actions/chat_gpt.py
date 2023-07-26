@@ -25,12 +25,7 @@ class ChatGPTParams(ChatGPTTokenParams):
     model: str = "gpt-3.5-turbo"
 
 
-@action
-def show_chat_gpt_search(event: ExecutionBaseEvent, params: ChatGPTParams):
-    """
-    Add a finding with ChatGPT top results for the specified search term.
-    This action can be used together with the stack_overflow_enricher.
-    """
+def query_chatgtp(params: ChatGPTParams):
     openai.api_type = "azure"
     openai.api_base = params.azure_openai_api_base
     openai.api_version = "2023-05-15"
@@ -59,6 +54,7 @@ def show_chat_gpt_search(event: ExecutionBaseEvent, params: ChatGPTParams):
                 max_tokens=1000,
                 temperature=0
             )
+            print(res)
             if res:
                 logging.info(f"ChatGPT response: {res}")
                 total_tokens = res.usage['total_tokens']
@@ -75,24 +71,9 @@ def show_chat_gpt_search(event: ExecutionBaseEvent, params: ChatGPTParams):
     except Exception as e:
         answers.append(f"Error calling ChatCompletion.create: {e}")
         raise
-
-    finding = Finding(
-        title=f"ChatGPT ({params.model}) Results",
-        source=FindingSource.PROMETHEUS,
-        aggregation_key="ChatGPT Wisdom",
-    )
-
-    if answers:
-        finding.add_enrichment([MarkdownBlock('\n'.join(answers))])
-    else:
-        finding.add_enrichment(
-            [
-                MarkdownBlock(
-                    f'Sorry, ChatGPT doesn\'t know anything about "{params.search_term}"'
-                )
-            ]
-        )
-    event.add_finding(finding)
+    
+    print(answers)
+    return answers
 
 
 @action
@@ -103,21 +84,16 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     alert_name = alert.alert.labels.get("alertname", "")
     if not alert_name:
         return
-    
+
+    action_params = ChatGPTParams(
+        search_term=f"{alert_name}",
+        azure_openai_token=params.azure_openai_token,
+        azure_openai_api_base=params.azure_openai_api_base,
+        azure_openai_deployment_id=params.azure_openai_deployment_id
+    )
+
     alert.add_enrichment(
         [
-            CallbackBlock(
-                {
-                    f'Ask ChatGPT: {alert_name}': CallbackChoice(
-                        action=show_chat_gpt_search,
-                        action_params=ChatGPTParams(
-                            search_term=f"{alert_name}",
-                            azure_openai_token=params.azure_openai_token,
-                            azure_openai_api_base=params.azure_openai_api_base,
-                            azure_openai_deployment_id=params.azure_openai_deployment_id
-                        ),
-                    )
-                },
-            )
+            JsonBlock(query_chatgtp(action_params))
         ]
     )
