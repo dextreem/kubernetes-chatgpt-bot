@@ -92,8 +92,11 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
         azure_openai_deployment_id=params.azure_openai_deployment_id
     )
 
+    answers = query_chatgtp(action_params)
+    print(answers)
+
     alert.add_enrichment(
         [
-            JsonBlock(query_chatgtp(action_params))
+            JsonBlock(answers)
         ]
     )
