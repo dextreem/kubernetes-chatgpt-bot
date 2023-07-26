@@ -27,7 +27,7 @@ The bot is implemented using [Robusta.dev](https://github.com/robusta-dev/robust
 ```
 playbookRepos:
   chatgpt_robusta_actions:
-    url: "https://github.com/robusta-dev/kubernetes-chatgpt-bot.git"
+    url: "https://github.com/dextreem/kubernetes-chatgpt-bot.git"
 
 customPlaybooks:
 # Add the 'Ask ChatGPT' button to all Prometheus alerts
