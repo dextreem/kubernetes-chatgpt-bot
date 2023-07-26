@@ -41,7 +41,9 @@ customPlaybooks:
 
 ```
 globalConfig:
-  chat_gpt_token: YOUR KEY GOES HERE
+  azure_openai_token: YOUR KEY GOES HERE
+  azure_openai_api_base: ...
+  azure_openai_deployment_id: ...
 ```
 
 4. Do a Helm upgrade to apply the new values: `helm upgrade robusta robusta/robusta --values=generated_values.yaml --set clusterName=<YOUR_CLUSTER_NAME>`
