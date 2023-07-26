@@ -74,6 +74,9 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     """
 
     alert_name = alert.alert.labels.get("alertname", "")
+    print (alert)
+    print ('XXX')
+    print(alert.alert)
 
     # TODO: dump funktioniert nicht
     # alert_name = json.dumps(alert)
