@@ -59,6 +59,8 @@ def query_chatgtp(params: ChatGPTParams):
                 # Store only the main response in the cache
                 lru_cache[params.search_term] = [response_content]
                 answers.append(response_content)
+            else:
+                logging.error(f"Got no Bedrock response!")
 
     except Exception as e:
         answers.append(f"Error calling ChatCompletion.create: {e}")
