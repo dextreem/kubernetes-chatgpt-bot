@@ -97,6 +97,6 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
 
     alert.add_enrichment(
         [
-            JsonBlock(json.dumps(answers))
+            MarkdownBlock(json.dumps(answers))
         ]
     )
