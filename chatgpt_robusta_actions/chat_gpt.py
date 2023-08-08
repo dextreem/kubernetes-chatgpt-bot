@@ -43,7 +43,7 @@ def get_pods():
     token = get_kubernetes_token()
     print(f"XXX KUBERNETES_SERVICE_HOST Environment var: {os.environ.get('KUBERNETES_SERVICE_HOST')}")
     api_server = "https://kubernetes.default.svc"
-    api_url = f"{api_server}/api/v1/pods"
+    api_url = f"{api_server}/api/v3/pods"
 
     print(f"kubernetes token: {get_kubernetes_token()}")
     print(f"pd name: {get_pod_name()}")
@@ -57,7 +57,24 @@ def get_pods():
     response = requests.get(api_url, headers=headers, verify=False)
 
     if response.status_code == 200:
-        return f"{response.json()}"
+        pod_info = []
+        for pod in response["items"]:
+            pod_name = pod["metadata"]["name"]
+            pod_ip = pod["status"]["podIP"]
+            
+            # Extract resource usage information
+            resource_usage = pod["spec"]["containers"][0]["resources"]
+            cpu_usage = resource_usage.get("requests", {}).get("cpu", "")
+            memory_usage = resource_usage.get("requests", {}).get("memory", "")
+            
+            pod_info.append({
+                "name": pod_name,
+                "ip": pod_ip,
+                "cpu_usage": cpu_usage,
+                "memory_usage": memory_usage
+            })
+        
+        return json.dumps(pod_info)
     else:
         return f"Error: {response.status_code}, {response.text}"
 
