@@ -76,7 +76,8 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     Add a button to the alert - clicking it will ask chat gpt to help find a solution.
     """
 
-    search_term = ", ".join([f"{key}: {value}" for key, value in alert.alert.labels.items()])
+    # search_term = ", ".join([f"{key}: {value}" for key, value in alert.alert.labels.items()])
+    search_term = json.dumps(alert.alert, indent=1)
     print ('XXX')
     print("XXX Labels: ", search_term)
 
