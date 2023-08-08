@@ -118,7 +118,7 @@ def query_chatgtp(params: ChatGPTParams):
                 {"role": "system", "content": "You are a helpful assistant. Provide kubectl commands only, no explanations!"},
                 {"role": "system", "content": "Provide a runnable kubectl command without placeholders!"},
                 {"role": "user",
-                 "content": f"Can you analyze the alert and make a Kubernetes command to solve it? Provide only the command, no explanation!\n{params.search_term}"}
+                 "content": f"Can you analyze the alert and make a kubectl command to resolve the alert? Provide only the command, no explanation!\n{params.search_term}"}
             ]
 
             print(f"ChatGPT input: {input}")
