@@ -32,7 +32,7 @@ def query_chatgtp(params: ChatGPTParams):
     openai.api_key = params.azure_openai_token
     deployment_id = params.azure_openai_deployment_id
 
-    logging.info(f"ChatGPT search term: {params.search_term}")
+    print(f"ChatGPT search term: {params.search_term}")
 
     answers = []
     try:
@@ -46,7 +46,7 @@ def query_chatgtp(params: ChatGPTParams):
                  "content": f"Can you analyze the alert and make a Kubernetes command to solve it? Provide only the command, no explanation!\n{params.search_term}"}
             ]
 
-            logging.info(f"ChatGPT input: {input}")
+            print(f"ChatGPT input: {input}")
             res: OpenAIObject = openai.ChatCompletion.create(
                 deployment_id=deployment_id,
                 model=params.model,
@@ -55,7 +55,7 @@ def query_chatgtp(params: ChatGPTParams):
                 temperature=0
             )
             if res:
-                logging.info(f"ChatGPT response: {res}")
+                print(f"ChatGPT response: {res}")
                 response_content = res.choices[0].message.content
                 # Store only the main response in the cache
                 lru_cache[params.search_term] = [response_content]
@@ -76,19 +76,18 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     Add a button to the alert - clicking it will ask chat gpt to help find a solution.
     """
 
-    alert_name = alert.alert.labels.get("alertname", "")
-    print (alert)
+    search_term = ", ".join([f"{key}: {value}" for key, value in alert.alert.labels.items()])
     print ('XXX')
-    print(alert.alert)
+    print("XXX Labels: ", search_term)
 
     # TODO: dump funktioniert nicht
     # alert_name = json.dumps(alert)
 
-    if not alert_name:
+    if not search_term:
         return
 
     action_params = ChatGPTParams(
-        search_term=f"{alert_name}",
+        search_term=f"{search_term}",
         azure_openai_token=params.azure_openai_token,
         azure_openai_api_base=params.azure_openai_api_base,
         azure_openai_deployment_id=params.azure_openai_deployment_id
