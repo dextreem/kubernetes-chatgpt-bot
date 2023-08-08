@@ -58,7 +58,7 @@ def get_pods():
 
     if response.status_code == 200:
         pod_info = []
-        for pod in response["items"]:
+        for pod in response.json()["items"]:
             pod_name = pod["metadata"]["name"]
             pod_ip = pod["status"]["podIP"]
             
