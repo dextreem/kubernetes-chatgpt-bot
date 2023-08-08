@@ -43,7 +43,7 @@ def get_pods():
     token = get_kubernetes_token()
     print(f"XXX KUBERNETES_SERVICE_HOST Environment var: {os.environ.get('KUBERNETES_SERVICE_HOST')}")
     api_server = "https://kubernetes.default.svc"
-    api_url = f"{api_server}/api/v1/namespaces/default/pods"
+    api_url = f"{api_server}/api/v1/pods"
 
     print(f"kubernetes token: {get_kubernetes_token()}")
     print(f"pd name: {get_pod_name()}")
@@ -150,8 +150,8 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     """
     Add a button to the alert - clicking it will ask chat gpt to help find a solution.
     """
-    # pods = get_pods()
-    pods = run_kubectl_command_in_pod("default", "kubectl get pods -A")
+    pods = get_pods()
+    # pods = run_kubectl_command_in_pod("default", "kubectl get pods -A")
 
     search_term = ", ".join([f"{key}: {value}" for key, value in alert.alert.labels.items()])
     search_term = f"{search_term}\n{alert.get_title()}\n{alert.get_description()}\nPods: {pods}"
