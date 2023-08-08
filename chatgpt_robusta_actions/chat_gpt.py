@@ -70,8 +70,8 @@ def get_pods():
             pod_info.append({
                 "name": pod_name,
                 "ip": pod_ip,
-                "cpu_usage": cpu_usage,
-                "memory_usage": memory_usage
+                # "cpu_usage": cpu_usage,
+                # "memory_usage": memory_usage
             })
         
         return json.dumps(pod_info)
@@ -117,7 +117,7 @@ def run_kubectl_command_in_pod(namespace, command):
         return f"Error: {response.status_code}, {response.text}"
 
 
-def query_chatgtp(params: ChatGPTParams):
+def query_chatgtp(params: ChatGPTParams, system = []):
     openai.api_type = "azure"
     openai.api_base = params.azure_openai_api_base
     openai.api_version = "2023-05-15"
@@ -134,6 +134,7 @@ def query_chatgtp(params: ChatGPTParams):
             input = [
                 {"role": "system", "content": "You are a helpful assistant. Provide kubectl commands only, no explanations!"},
                 {"role": "system", "content": "Provide a runnable kubectl command without placeholders!"},
+                *[{"role": "system", "content": f"Use this as context information: {system_cmd}"} for system_cmd in system],
                 {"role": "user",
                  "content": f"Can you analyze the alert and make a kubectl command to resolve the alert? Provide only the command, no explanation!\n{params.search_term}"}
             ]
@@ -171,7 +172,7 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     # pods = run_kubectl_command_in_pod("default", "kubectl get pods -A")
 
     search_term = ", ".join([f"{key}: {value}" for key, value in alert.alert.labels.items()])
-    search_term = f"{search_term}\n{alert.get_title()}\n{alert.get_description()}\nPods: {pods}"
+    search_term = f"{search_term}\n{alert.get_title()}\n{alert.get_description()}"
     # search_term = json.dumps(alert.alert, indent=1)
     print ('XXX')
     print("XXX Labels: ", search_term)
@@ -189,7 +190,7 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
         azure_openai_deployment_id=params.azure_openai_deployment_id
     )
 
-    answers = query_chatgtp(action_params)
+    answers = query_chatgtp(action_params, [pods])
 
     alert.add_enrichment(
         [
