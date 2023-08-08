@@ -77,7 +77,7 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     """
 
     search_term = ", ".join([f"{key}: {value}" for key, value in alert.alert.labels.items()])
-    search_term = f"{search_term}\n{alert.get_alert_label()}\n{alert.get_title()}\n{alert.get_description()}"
+    search_term = f"{search_term}\n{alert.get_title()}\n{alert.get_description()}"
     # search_term = json.dumps(alert.alert, indent=1)
     print ('XXX')
     print("XXX Labels: ", search_term)
