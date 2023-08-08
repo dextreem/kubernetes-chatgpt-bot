@@ -80,10 +80,10 @@ def run_kubectl_command_in_pod(namespace, command):
     data = {
         "apiVersion": "v1",
         "kind": "Exec",
-        # "metadata": {
-        #     "namespace": namespace,
-        #     "name": get_pod_name(),
-        # },
+        "metadata": {
+            "namespace": namespace,
+            "name": get_pod_name(),
+        },
         "spec": {
             "container": get_container_name(),
             "command": command.split(' '),
@@ -151,7 +151,7 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     Add a button to the alert - clicking it will ask chat gpt to help find a solution.
     """
     # pods = get_pods()
-    pods = run_kubectl_command_in_pod("kubectl get pods -A")
+    pods = run_kubectl_command_in_pod("default", "kubectl get pods -A")
 
     search_term = ", ".join([f"{key}: {value}" for key, value in alert.alert.labels.items()])
     search_term = f"{search_term}\n{alert.get_title()}\n{alert.get_description()}\nPods: {pods}"
