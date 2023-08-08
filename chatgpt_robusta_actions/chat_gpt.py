@@ -80,10 +80,10 @@ def run_kubectl_command_in_pod(namespace, command):
     data = {
         "apiVersion": "v1",
         "kind": "Exec",
-        "metadata": {
-            "namespace": namespace,
-            "name": get_pod_name(),
-        },
+        # "metadata": {
+        #     "namespace": namespace,
+        #     "name": get_pod_name(),
+        # },
         "spec": {
             "container": get_container_name(),
             "command": command.split(' '),
