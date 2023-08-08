@@ -43,7 +43,7 @@ def get_pods():
     token = get_kubernetes_token()
     print(f"XXX KUBERNETES_SERVICE_HOST Environment var: {os.environ.get('KUBERNETES_SERVICE_HOST')}")
     api_server = "https://kubernetes.default.svc"
-    api_url = f"{api_server}/api/v3/pods"
+    api_url = f"{api_server}/api/v1/pods"
 
     print(f"kubernetes token: {get_kubernetes_token()}")
     print(f"pd name: {get_pod_name()}")
