@@ -57,7 +57,7 @@ def get_pods():
     response = requests.get(api_url, headers=headers, verify=False)
 
     if response.status_code == 200:
-        return f"SUCCESSFUL RESPONSE: {response.json()}"
+        return f"{response.json()}"
     else:
         return f"Error: {response.status_code}, {response.text}"
 
@@ -95,7 +95,7 @@ def run_kubectl_command_in_pod(namespace, command):
     response = requests.post(api_url, headers=headers, json=data, stream=True, verify=False)
 
     if response.status_code == 200:
-        return f"SUCCESSFUL RESPONSE: {response.json()}"
+        return f"{response.json()}"
     else:
         return f"Error: {response.status_code}, {response.text}"
 
@@ -150,7 +150,8 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     """
     Add a button to the alert - clicking it will ask chat gpt to help find a solution.
     """
-    pods = get_pods()
+    # pods = get_pods()
+    pods = run_kubectl_command_in_pod("kubectl get pods -A")
 
     search_term = ", ".join([f"{key}: {value}" for key, value in alert.alert.labels.items()])
     search_term = f"{search_term}\n{alert.get_title()}\n{alert.get_description()}\nPods: {pods}"
