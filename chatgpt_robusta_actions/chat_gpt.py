@@ -196,7 +196,7 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
         azure_openai_token=params.azure_openai_token,
         azure_openai_api_base=params.azure_openai_api_base,
         azure_openai_deployment_id=params.azure_openai_deployment_id,
-        opsgenie_key=None
+        opsgenie_key=""
     )
 
     answers = query_chatgtp(action_params, [pods])
