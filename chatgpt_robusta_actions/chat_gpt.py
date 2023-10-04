@@ -27,21 +27,27 @@ class ChatGPTParams(ChatGPTTokenParams):
     search_term: str
     model: str = "gpt-3.5-turbo"
 
+
 def get_kubernetes_token():
     token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
     with open(token_file, "r") as f:
         return f.read().strip()
-    
+
+
 def get_pod_name():
     return os.environ.get("POD_NAME")
+
 
 def get_container_name():
     return os.environ.get("CONTAINER_NAME", "your-container-name")
 
 # Use this to list pods
+
+
 def get_pods():
     token = get_kubernetes_token()
-    print(f"XXX KUBERNETES_SERVICE_HOST Environment var: {os.environ.get('KUBERNETES_SERVICE_HOST')}")
+    print(
+        f"XXX KUBERNETES_SERVICE_HOST Environment var: {os.environ.get('KUBERNETES_SERVICE_HOST')}")
     api_server = "https://kubernetes.default.svc"
     api_url = f"{api_server}/api/v1/pods"
 
@@ -61,24 +67,26 @@ def get_pods():
         for pod in response.json()["items"]:
             pod_name = pod["metadata"]["name"]
             pod_ip = pod["status"]["podIP"]
-            
+
             # Extract resource usage information
             resource_usage = pod["spec"]["containers"][0]["resources"]
             cpu_usage = resource_usage.get("requests", {}).get("cpu", "")
             memory_usage = resource_usage.get("requests", {}).get("memory", "")
-            
+
             pod_info.append({
                 "name": pod_name,
                 "ip": pod_ip,
                 # "cpu_usage": cpu_usage,
                 # "memory_usage": memory_usage
             })
-        
+
         return json.dumps(pod_info)
     else:
         return f"Error: {response.status_code}, {response.text}"
 
 # Use this to run custom commands
+
+
 def run_kubectl_command_in_pod(namespace, command):
     # api_server = os.environ.get("KUBERNETES_SERVICE_HOST", "https://kubernetes.default.svc")
     api_server = "https://kubernetes.default.svc"
@@ -109,7 +117,8 @@ def run_kubectl_command_in_pod(namespace, command):
         }
     }
 
-    response = requests.post(api_url, headers=headers, json=data, stream=True, verify=False)
+    response = requests.post(api_url, headers=headers,
+                             json=data, stream=True, verify=False)
 
     if response.status_code == 200:
         return f"{response.json()}"
@@ -117,7 +126,7 @@ def run_kubectl_command_in_pod(namespace, command):
         return f"Error: {response.status_code}, {response.text}"
 
 
-def query_chatgtp(params: ChatGPTParams, system = []):
+def query_chatgtp(params: ChatGPTParams, system=[]):
     openai.api_type = "azure"
     openai.api_base = params.azure_openai_api_base
     openai.api_version = "2023-05-15"
@@ -134,7 +143,8 @@ def query_chatgtp(params: ChatGPTParams, system = []):
             input = [
                 {"role": "system", "content": "You are a helpful assistant. Provide kubectl commands only, no explanations!"},
                 {"role": "system", "content": "Provide a runnable kubectl command without placeholders!"},
-                *[{"role": "system", "content": f"Use this as context information: {system_cmd}"} for system_cmd in system],
+                *[{"role": "system", "content": f"Use this as context information: {system_cmd}"}
+                    for system_cmd in system],
                 {"role": "user",
                  "content": f"Can you analyze the alert and make a kubectl command to resolve the alert? Provide only the command, no explanation!\n{params.search_term}"}
             ]
@@ -159,26 +169,20 @@ def query_chatgtp(params: ChatGPTParams, system = []):
     except Exception as e:
         answers.append(f"Error calling ChatCompletion.create: {e}")
         raise
-    
+
     return answers
 
 
 @action
 def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenParams):
-    """
-    Add a button to the alert - clicking it will ask chat gpt to help find a solution.
-    """
     pods = get_pods()
     # pods = run_kubectl_command_in_pod("default", "kubectl get pods -A")
 
-    search_term = ", ".join([f"{key}: {value}" for key, value in alert.alert.labels.items()])
+    search_term = ", ".join(
+        [f"{key}: {value}" for key, value in alert.alert.labels.items()])
     search_term = f"{search_term}\n{alert.get_title()}\n{alert.get_description()}"
-    # search_term = json.dumps(alert.alert, indent=1)
-    print ('XXX')
+    print('XXX')
     print("XXX Labels: ", search_term)
-
-    # TODO: dump funktioniert nicht
-    # alert_name = json.dumps(alert)
 
     if not search_term:
         return
@@ -191,6 +195,11 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     )
 
     answers = query_chatgtp(action_params, [pods])
+
+    print("Here comes the prometheus kubernetes alert")
+    print(json.dumps(alert,
+                     sort_keys=True,
+                     indent=2))
 
     alert.add_enrichment(
         [
