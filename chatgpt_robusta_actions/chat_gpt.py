@@ -173,6 +173,14 @@ def query_chatgtp(params: ChatGPTParams, system=[]):
     return answers
 
 
+def walk_dict(d):
+    for k, v in sorted(d.items(), key=lambda x: x[0]):
+        if isinstance(v, dict):
+            walk_dict(v)
+        else:
+            print("%s %s" % (k, v))
+
+
 @action
 def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenParams):
     pods = get_pods()
@@ -197,10 +205,7 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     answers = query_chatgtp(action_params, [pods])
 
     print("Here comes the prometheus kubernetes alert")
-    print(json.dumps(alert,
-                     sort_keys=True,
-                     indent=2,
-                     default=lambda a: '<not serializable>'))
+    walk_dict(alert)
 
     alert.add_enrichment(
         [
