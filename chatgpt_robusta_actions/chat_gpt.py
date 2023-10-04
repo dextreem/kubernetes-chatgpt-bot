@@ -203,12 +203,12 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
 
     opsGenieAlerting = OpsGenieAlerting(
         "https://api.eu.opsgenie.com", params.opsgenie_key, "ARIS Ops Test", True, 10)
-    alerts = opsGenieAlerting.getOpenAlertsByTagsAndContainingDescription(
-        tags=[alert.alert.labels['cluster']], containingDescription=alert.get_description())
+    alerts = opsGenieAlerting.getOpenAlertsByTagsAndContainingMessage(
+        tags=[alert.alert.labels['cluster']], containingMessage=alert.alert.labels['alertname'])
 
     for a in alerts:
         opsGenieAlerting.addNoteToAlert(
-            a, f"Happy help 2.0 from ChatGPT: {json.dumps(answers)}", "IW test")
+            a, f"Happy help from ChatGPT: {json.dumps(answers)}", "IW test")
 
     alert.add_enrichment(
         [
