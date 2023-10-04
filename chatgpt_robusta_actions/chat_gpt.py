@@ -197,10 +197,6 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
 
     answers = query_chatgtp(action_params, [pods])
 
-    print("Here comes the prometheus kubernetes alert")
-    print(json.dumps(alert, default=lambda o: o.__dict__ if not isinstance(o, datetime) else dict(
-        year=o.year, month=o.month, day=o.day, hour=o.hour, minute=o.minute, second=o.second)))
-
     alert.add_enrichment(
         [
             MarkdownBlock(json.dumps(answers))
