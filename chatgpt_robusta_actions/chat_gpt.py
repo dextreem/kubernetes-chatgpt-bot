@@ -199,7 +199,8 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     print("Here comes the prometheus kubernetes alert")
     print(json.dumps(alert,
                      sort_keys=True,
-                     indent=2))
+                     indent=2,
+                     default=lambda a: '<not serializable>'))
 
     alert.add_enrichment(
         [
