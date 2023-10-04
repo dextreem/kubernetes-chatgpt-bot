@@ -3,12 +3,14 @@ import json
 
 import os
 import requests
-import datetime
 
 import cachetools
 import openai
 from openai.openai_object import OpenAIObject
 from robusta.api import *
+
+from .opsGenieAlerting import OpsGenieAlerting
+
 
 cache_size = 100
 lru_cache = cachetools.LRUCache(maxsize=cache_size)
@@ -18,6 +20,7 @@ class ChatGPTTokenParams(ActionParams):
     azure_openai_token: str
     azure_openai_api_base: str
     azure_openai_deployment_id: str
+    opsgenie_key: str
 
 
 class ChatGPTParams(ChatGPTTokenParams):
@@ -196,6 +199,15 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     )
 
     answers = query_chatgtp(action_params, [pods])
+
+    opsGenieAlerting = OpsGenieAlerting(
+        "https://api.eu.opsgenie.com", params.opsgenie_key, "ARIS Ops Test", True, 10)
+    alerts = opsGenieAlerting.getOpenAlertsByTagsAndContainingMessage(
+        tags=[alert.alert.labels['cluster']], containingMessage=alert.alert.labels['alertname'])
+
+    for alert in alerts:
+        opsGenieAlerting.addNoteToAlert(
+            alert, f"Happy help from ChatGPT: {json.dumps(answers)}", "IW test")
 
     alert.add_enrichment(
         [
