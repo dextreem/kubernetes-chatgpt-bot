@@ -1,5 +1,6 @@
 import logging
 import json
+import subprocess
 
 import os
 import requests
@@ -177,6 +178,10 @@ def query_chatgtp(params: ChatGPTParams, system=[]):
     return answers
 
 
+def runKubectlCommand(cmd):
+    return subprocess.getoutput(cmd)
+
+
 @action
 def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenParams):
     pods = get_pods()
@@ -200,6 +205,9 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
     )
 
     answers = query_chatgtp(action_params, [pods])
+
+    kubectlResponse = runKubectlCommand(answers[0])
+    answers.append("Kubectl run response: " + kubectlResponse)
 
     opsGenieAlerting = OpsGenieAlerting(
         "https://api.eu.opsgenie.com", params.opsgenie_key, "ARIS Ops Test", True, 10)
