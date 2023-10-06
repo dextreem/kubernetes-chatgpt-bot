@@ -97,7 +97,7 @@ def run_kubectl_command_in_pod(namespace, command):
     api_server = "https://kubernetes.default.svc"
     api_url = f"{api_server}/api/v1/namespaces/{namespace}/pods/{get_pod_name()}/exec"
 
-    print(f"kubernetes token: {get_kubernetes_token()}")
+    # print(f"kubernetes token: {get_kubernetes_token()}")
     print(f"pod name: {get_pod_name()}")
     print(f"container name: {get_container_name()}")
     print(f"command: '{command}'")
