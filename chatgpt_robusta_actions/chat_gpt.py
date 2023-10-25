@@ -56,6 +56,7 @@ def query_chatgtp(params: ChatGPTParams, system=[]):
             input = [
                 {"role": "system", "content": "You are a helpful assistant. Provide kubectl commands only, no explanations!"},
                 {"role": "system", "content": "Provide a runnable kubectl command without placeholders!"},
+                {"role": "system", "content": "Don't provide kubectl commands that do not modify anything, i.e., no kubectl describe."},
                 *[{"role": "system", "content": f"Use this as context information: {system_cmd}"}
                     for system_cmd in system],
                 {"role": "user",
