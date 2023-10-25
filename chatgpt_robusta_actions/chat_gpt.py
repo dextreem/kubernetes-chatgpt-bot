@@ -122,7 +122,7 @@ def chat_gpt_enricher(alert: PrometheusKubernetesAlert, params: ChatGPTTokenPara
 
     for a in alerts:
         opsGenieAlerting.addNoteToAlert(
-            a, f"Happy help from ChatGPT: {json.dumps(answers)}", "IW test")
+            a, f"GenAI generated help: {json.dumps(answers)}", "IW test")
 
     alert.add_enrichment(
         [
