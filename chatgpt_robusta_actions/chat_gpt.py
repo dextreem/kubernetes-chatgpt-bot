@@ -15,6 +15,7 @@ from .opsGenieAlerting import OpsGenieAlerting
 
 cache_size = 100
 lru_cache = cachetools.LRUCache(maxsize=cache_size)
+use_cache = False
 
 
 class ChatGPTTokenParams(ActionParams):
@@ -48,7 +49,7 @@ def query_chatgtp(params: ChatGPTParams, system=[]):
 
     answers = []
     try:
-        if params.search_term in lru_cache:
+        if use_cache and params.search_term in lru_cache:
             answers = lru_cache[params.search_term]
         else:
             input = [
